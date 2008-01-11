@@ -129,24 +129,28 @@ namespace Logo2Modbus
                     case LogoStatus.Offline:
                         toolStripStatusLabel1.Visible = false;
                         groupBox1.Enabled = true;
+                        comPortBox.Enabled = true;
                         break;
                     case LogoStatus.Online:
                         toolStripStatusLabel1.Text = "Offline";
                         toolStripStatusLabel1.Image = Logo2Modbus.Properties.Resources.Critical;
                         toolStripStatusLabel1.Visible = true;
                         groupBox1.Enabled = false;
+                        comPortBox.Enabled = false;
                         break;
                     case LogoStatus.InStop:
                         toolStripStatusLabel1.Text = "Logo in Stop?";
                         toolStripStatusLabel1.Image = Logo2Modbus.Properties.Resources.Warning;
                         toolStripStatusLabel1.Visible = true;
                         groupBox1.Enabled = false;
+                        comPortBox.Enabled = false;
                         break;
                     case LogoStatus.Connected:
                         toolStripStatusLabel1.Text = "Online";
                         toolStripStatusLabel1.Image = Logo2Modbus.Properties.Resources.OK;
                         toolStripStatusLabel1.Visible = true;
                         groupBox1.Enabled = false;
+                        comPortBox.Enabled = false;
                         break;
                 }
             }

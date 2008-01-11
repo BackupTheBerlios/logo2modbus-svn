@@ -29,14 +29,19 @@ namespace Logo2Modbus
 
     public enum LogoStatus
     {
+        /* Offline : Verbindung getrennt.
+         * Online  : Verbindung soll hergestellt werden.
+         * Instop  : Verbindung zur Logo ist hergestellt, aber die Logo ist nicht in RUN.
+         * Connect : Verbindung steht, Logo ist in RUN und Werte werden gelesen.
+         */
         Offline, Online, InStop, Connected
     } 
 
     class LogoDriver
     {
-        static byte[] INITCODE = { 0x02, 0x1F, 0x02 };
-        static byte[] INITANSWER = { 0x06, 0x03, 0x1F, 0x02, 0x42 };
-        static byte[] ASKRUNSTOP = { 0x55, 0x17, 0x17, 0xAA };
+        static byte[] INITCODE = { 0x02, 0x1F, 0x02 }; //Codesequenz zum starten der Übertragung
+        static byte[] INITANSWER = { 0x06, 0x03, 0x1F, 0x02, 0x42 }; //Antwort auf INITCODE
+        static byte[] ASKRUNSTOP = { 0x55, 0x17, 0x17, 0xAA }; 
         static byte[] ANSWERRUN = { 0x06, 0x01 };
         static byte[] ASKSTATUS = { 0x55, 0x13, 0x13, 0x00, 0xAA };
         static int WAITTIME = 300;
@@ -48,7 +53,7 @@ namespace Logo2Modbus
         public LogoStatus status;
         public event LogoStatusChangeHandler logoStatusChanged; 
         
-        public int cykleTime = 700;
+        public int cykleTime = 300;
 
         private void setStatus(LogoStatus status)
         {
@@ -76,6 +81,7 @@ namespace Logo2Modbus
             shouldstop = false;
             setStatus(LogoStatus.Offline);
 
+            // Datenspeicher/Prozessabbild initalisieren.
             dataImage = new DataStore();
             dataImage.InputDiscretes = CollectionUtility.CreateDefaultCollection<ModbusDataCollection<bool>,bool>(false, 64);
             dataImage.InputRegisters = CollectionUtility.CreateDefaultCollection<ModbusDataCollection<ushort>, ushort>(0, 80);
