@@ -115,34 +115,42 @@ namespace Logo2Modbus
             logoDriver.setPortName((String) comPortBox.SelectedItem);
         }
 
-       public void logostatusChanged()
-       {
-           switch (logoDriver.status)
-           {
-               case LogoStatus.Offline:
-                   toolStripStatusLabel1.Visible = false;
-                   groupBox1.Enabled = true;
-                   break;
-               case LogoStatus.Online:
-                   toolStripStatusLabel1.Text = "Offline";
-                   toolStripStatusLabel1.Image = Logo2Modbus.Properties.Resources.Critical;
-                   toolStripStatusLabel1.Visible = true;
-                   groupBox1.Enabled = false;
-                   break;
-               case LogoStatus.InStop:
-                   toolStripStatusLabel1.Text = "Logo in Stop?";
-                   toolStripStatusLabel1.Image = Logo2Modbus.Properties.Resources.Warning;
-                   toolStripStatusLabel1.Visible = true;
-                   groupBox1.Enabled = false;
-                   break;
-               case LogoStatus.Connected:
-                   toolStripStatusLabel1.Text = "Online";
-                   toolStripStatusLabel1.Image = Logo2Modbus.Properties.Resources.OK;
-                   toolStripStatusLabel1.Visible = true;
-                   groupBox1.Enabled = false;
-                   break;
-           }
-       }
+        public void logostatusChanged()
+        {
+            if (this.InvokeRequired)
+            {
+                LogoStatusChangeHandler h = new LogoStatusChangeHandler(logostatusChanged);
+                this.Invoke(h);
+            }
+            else
+            {
+                switch (logoDriver.status)
+                {
+                    case LogoStatus.Offline:
+                        toolStripStatusLabel1.Visible = false;
+                        groupBox1.Enabled = true;
+                        break;
+                    case LogoStatus.Online:
+                        toolStripStatusLabel1.Text = "Offline";
+                        toolStripStatusLabel1.Image = Logo2Modbus.Properties.Resources.Critical;
+                        toolStripStatusLabel1.Visible = true;
+                        groupBox1.Enabled = false;
+                        break;
+                    case LogoStatus.InStop:
+                        toolStripStatusLabel1.Text = "Logo in Stop?";
+                        toolStripStatusLabel1.Image = Logo2Modbus.Properties.Resources.Warning;
+                        toolStripStatusLabel1.Visible = true;
+                        groupBox1.Enabled = false;
+                        break;
+                    case LogoStatus.Connected:
+                        toolStripStatusLabel1.Text = "Online";
+                        toolStripStatusLabel1.Image = Logo2Modbus.Properties.Resources.OK;
+                        toolStripStatusLabel1.Visible = true;
+                        groupBox1.Enabled = false;
+                        break;
+                }
+            }
+        }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
