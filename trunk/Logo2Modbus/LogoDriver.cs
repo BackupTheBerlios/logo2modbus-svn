@@ -94,18 +94,29 @@ namespace Logo2Modbus
             serialPort.PortName = name;
         }
 
-        public void start()
+        public Boolean start()
         {
             if (!running)
             {
                 running = true;
                 setStatus(LogoStatus.Online);
                 shouldstop = false;
-                serialPort.Open();
-                commThread = new Thread(run);
-                commThread.Start();
-                
+                try
+                {
+                    serialPort.Open();
+                    commThread = new Thread(run);
+                    commThread.Start();
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    running = false;
+                    setStatus(LogoStatus.Offline);
+                    shouldstop = true;
+                    return false;
+                }
+                return true;
             }
+            return false;
         }
 
         public void stop()

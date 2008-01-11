@@ -91,16 +91,18 @@ namespace Logo2Modbus
                     }
                     catch (ArgumentNullException ex) { address = new IPAddress(new byte[] { 127, 0, 0, 1 }); }
                 }
-                logoDriver.start();
+                if (!logoDriver.start()) MessageBox.Show("Der Ausgewählte Com-Port ist belegt.");
+                else
+                {
+                    slaveTcpListener = new TcpListener(address, int.Parse(portBox.Text));
+                    slaveTcpListener.Start();
 
-                slaveTcpListener = new TcpListener(address, int.Parse(portBox.Text));
-                slaveTcpListener.Start();
+                    modbusSlave = ModbusTcpSlave.CreateTcp(1, slaveTcpListener);
+                    modbusSlave.DataStore = logoDriver.dataImage;
 
-                modbusSlave = ModbusTcpSlave.CreateTcp(1, slaveTcpListener);
-                modbusSlave.DataStore = logoDriver.dataImage;
-
-                modbusSlave.Listen();
-                startButton.Text = "Trennen";
+                    modbusSlave.Listen();
+                    startButton.Text = "Trennen";
+                }
             }
             else
             {
