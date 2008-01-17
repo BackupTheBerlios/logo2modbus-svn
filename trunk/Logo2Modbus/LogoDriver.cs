@@ -22,6 +22,7 @@ using System.IO.Ports;
 using System.Threading;
 using Modbus.Data;
 using Modbus.Utility;
+using Modbus.Device;
 
 namespace Logo2Modbus
 {
@@ -49,11 +50,12 @@ namespace Logo2Modbus
         private SerialPort serialPort;
         private Thread commThread;
         private bool running, shouldstop = false;
+        public ModbusSlave modbusslave;
         
         public LogoStatus status;
         public event LogoStatusChangeHandler logoStatusChanged; 
         
-        public int cykleTime = 300;
+        public int cykleTime = 0;
 
         private void setStatus(LogoStatus status)
         {
@@ -63,8 +65,6 @@ namespace Logo2Modbus
                 logoStatusChanged();
             }
         }
-
-        public readonly DataStore dataImage;
 
         public LogoDriver()
         {
@@ -81,12 +81,6 @@ namespace Logo2Modbus
             shouldstop = false;
             setStatus(LogoStatus.Offline);
 
-            // Datenspeicher/Prozessabbild initalisieren.
-            dataImage = new DataStore();
-            dataImage.InputDiscretes = CollectionUtility.CreateDefaultCollection<ModbusDataCollection<bool>,bool>(false, 64);
-            dataImage.InputRegisters = CollectionUtility.CreateDefaultCollection<ModbusDataCollection<ushort>, ushort>(0, 80);
-            dataImage.HoldingRegisters = CollectionUtility.CreateDefaultCollection<ModbusDataCollection<ushort>, ushort>(0, 32);
-            dataImage.CoilDiscretes = CollectionUtility.CreateDefaultCollection<ModbusDataCollection<bool>, bool>(false, 0);
         }
 
         public void setPortName(String name)
@@ -185,6 +179,12 @@ namespace Logo2Modbus
             {
                 if (data[0] == 0x06)
                 {
+                    // Datenspeicher/Prozessabbild initalisieren.
+                    DataStore dataImage = new DataStore();
+                    dataImage.InputDiscretes = CollectionUtility.CreateDefaultCollection<ModbusDataCollection<bool>, bool>(false, 64);
+                    dataImage.InputRegisters = CollectionUtility.CreateDefaultCollection<ModbusDataCollection<ushort>, ushort>(0, 80);
+                    dataImage.HoldingRegisters = CollectionUtility.CreateDefaultCollection<ModbusDataCollection<ushort>, ushort>(0, 32);
+                    dataImage.CoilDiscretes = CollectionUtility.CreateDefaultCollection<ModbusDataCollection<bool>, bool>(false, 0);
                     //Digitalwerte
                     //Eingänge 24(3 byte), Ausgänge 16(2 byte), Merker 24(3 byte)
                     for (int i = 0; i < 8; i++)
@@ -207,7 +207,7 @@ namespace Logo2Modbus
                         dataImage.HoldingRegisters[i*2+1] = BitConverter.ToUInt16(BitConverter.GetBytes((float)dataImage.InputRegisters[i+1]), 0);
                         dataImage.HoldingRegisters[i*2+2] = BitConverter.ToUInt16(BitConverter.GetBytes((float)dataImage.InputRegisters[i+1]), 2);
                     }
-
+                    modbusslave.DataStore = dataImage;
                     return true;
                 }
             }

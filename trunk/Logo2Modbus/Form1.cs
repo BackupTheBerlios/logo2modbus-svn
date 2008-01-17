@@ -98,7 +98,7 @@ namespace Logo2Modbus
                     slaveTcpListener.Start();
 
                     modbusSlave = ModbusTcpSlave.CreateTcp(1, slaveTcpListener);
-                    modbusSlave.DataStore = logoDriver.dataImage;
+                    logoDriver.modbusslave = modbusSlave;
 
                     modbusSlave.Listen();
                     startButton.Text = "Trennen";
