@@ -95,7 +95,6 @@ namespace Logo2Modbus
                 else
                 {
                     slaveTcpListener = new TcpListener(address, int.Parse(portBox.Text));
-                    slaveTcpListener.Start();
 
                     modbusSlave = ModbusTcpSlave.CreateTcp(1, slaveTcpListener);
                     logoDriver.modbusslave = modbusSlave;
