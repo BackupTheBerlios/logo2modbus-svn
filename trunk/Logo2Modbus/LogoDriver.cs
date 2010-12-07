@@ -50,7 +50,7 @@ namespace Logo2Modbus
         private SerialPort serialPort;
         private Thread commThread;
         private bool running, shouldstop = false;
-        public ModbusSlave modbusslave;
+        public ModbusSlave modbusSlave;
         
         public LogoStatus status;
         public event LogoStatusChangeHandler logoStatusChanged; 
@@ -179,12 +179,7 @@ namespace Logo2Modbus
             {
                 if (data[0] == 0x06)
                 {
-                    // Datenspeicher/Prozessabbild initalisieren.
-                    DataStore dataImage = new DataStore();
-                    dataImage.InputDiscretes = CollectionUtility.CreateDefaultCollection<ModbusDataCollection<bool>, bool>(false, 64);
-                    dataImage.InputRegisters = CollectionUtility.CreateDefaultCollection<ModbusDataCollection<ushort>, ushort>(0, 80);
-                    dataImage.HoldingRegisters = CollectionUtility.CreateDefaultCollection<ModbusDataCollection<ushort>, ushort>(0, 32);
-                    dataImage.CoilDiscretes = CollectionUtility.CreateDefaultCollection<ModbusDataCollection<bool>, bool>(false, 0);
+                    
                     //Digitalwerte
                     //Eingänge 24(3 byte), Ausgänge 16(2 byte), Merker 24(3 byte)
                     for (int i = 0; i < 8; i++)
@@ -192,9 +187,9 @@ namespace Logo2Modbus
                         for (int j = 0; j < 8; j++)
                         {
                             int index = i * 8 + j+1;
-                            dataImage.InputDiscretes[index] = (0 != (data[28 + i] & (byte) 0x0001 << j));
+                            modbusSlave.DataStore.InputDiscretes[index] = (0 != (data[28 + i] & (byte)0x0001 << j));
                             // !Workaround zur Darstellung von Binärsignalen in Kurven. Alle diskreten Werte werden nochmal als Analogwert (High:100/Low:0) gespeichert.
-                            dataImage.InputRegisters[16 + index] = (ushort) (dataImage.InputDiscretes[index] ? 100 : 0);
+                            modbusSlave.DataStore.InputRegisters[16 + index] = (ushort)(modbusSlave.DataStore.InputDiscretes[index] ? 100 : 0);
                         }
                     }
                     
@@ -202,12 +197,11 @@ namespace Logo2Modbus
                     //Eingänge 8, Ausgänge 2, Merker 6
                     for (int i = 0; i < 16; i++)
                     {
-                        dataImage.InputRegisters[i+1] = BitConverter.ToUInt16(data,38+2*i);
+                        modbusSlave.DataStore.InputRegisters[i + 1] = BitConverter.ToUInt16(data, 38 + 2 * i);
                         // !Workaround für WinCC flexible: Alle Analogwerte werden als 32bit float in den HoldingRegister nochmal gespeichert.
-                        dataImage.HoldingRegisters[i*2+1] = BitConverter.ToUInt16(BitConverter.GetBytes((float)dataImage.InputRegisters[i+1]), 0);
-                        dataImage.HoldingRegisters[i*2+2] = BitConverter.ToUInt16(BitConverter.GetBytes((float)dataImage.InputRegisters[i+1]), 2);
+                        modbusSlave.DataStore.HoldingRegisters[i * 2 + 1] = BitConverter.ToUInt16(BitConverter.GetBytes((float)modbusSlave.DataStore.InputRegisters[i + 1]), 0);
+                        modbusSlave.DataStore.HoldingRegisters[i * 2 + 2] = BitConverter.ToUInt16(BitConverter.GetBytes((float)modbusSlave.DataStore.InputRegisters[i + 1]), 2);
                     }
-                    modbusslave.DataStore = dataImage;
                     return true;
                 }
             }

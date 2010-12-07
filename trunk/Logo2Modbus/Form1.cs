@@ -26,16 +26,19 @@ using System.Net.NetworkInformation;
 using System.Collections;
 using System.IO.Ports;
 using Modbus.Device;
+using Modbus.Data;
 using System.Net.Sockets;
 using System.Net;
+using System.Threading;
 
 namespace Logo2Modbus
 {
     public partial class Form1 : Form
     {
         private LogoDriver logoDriver;
-        private ModbusSlave modbusSlave;
+        private ModbusTcpSlave modbusSlave;
         private TcpListener slaveTcpListener;
+        private Thread slaveThread;
 
         public Form1()
         {
@@ -97,9 +100,12 @@ namespace Logo2Modbus
                     slaveTcpListener = new TcpListener(address, int.Parse(portBox.Text));
 
                     modbusSlave = ModbusTcpSlave.CreateTcp(1, slaveTcpListener);
-                    logoDriver.modbusslave = modbusSlave;
 
-                    modbusSlave.Listen();
+                    // Datenspeicher/Prozessabbild initalisieren.
+                    modbusSlave.DataStore = DataStoreFactory.CreateDefaultDataStore();
+                    logoDriver.modbusSlave = modbusSlave;
+                    slaveThread = new Thread(modbusSlave.Listen);
+                    slaveThread.Start();
                     startButton.Text = "Trennen";
                 }
             }
@@ -107,6 +113,7 @@ namespace Logo2Modbus
             {
                 logoDriver.stop();
                 startButton.Text = "Verbinden";
+                modbusSlave.Dispose();
                 slaveTcpListener.Stop();
             }
         }
